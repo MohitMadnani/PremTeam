@@ -12,7 +12,7 @@
   }
 
   h1 {
-    color: #000000; // Black text
+    color: #000000; 
     font-size: 53px;
     margin: 0;
     font-weight: 400;
@@ -20,15 +20,16 @@
 
     .animated-letters {
       display: inline-block;
-      animation: fadeIn 1s forwards; // Add fade-in animation
+      animation: fadeIn 1s forwards; 
     }
 
     img {
       width: 200px;
       height: auto;
-      opacity: 0; // Start invisible
-      animation: rotateIn 1s linear both; // Add rotation animation
-      animation-delay: 1.4s; // Delay the animation
+      opacity: 0; 
+      animation: rotateIn 1s linear both; 
+      animation-delay: 1.4s; 
+      align-items: left;
     }
   }
 
@@ -39,7 +40,7 @@
     font-size: 18px;
     font-family: sans-serif;
     letter-spacing: 2px;
-    animation: fadeIn 1s 1.8s backwards; // Add fade-in animation
+    animation: fadeIn 1s 1.8s backwards; 
   }
 
   .flat-button {

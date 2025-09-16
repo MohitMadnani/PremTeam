@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
+import "./index.scss"
 
 
 const Sidebar = () => {
