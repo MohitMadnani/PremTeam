@@ -2,7 +2,7 @@ import LogoPL from "../../assets/images/PL.webp"
 import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faSearch } from "@fortawesome/free-solid-svg-icons";
 import "./index.scss"
 
 
@@ -17,6 +17,9 @@ const Sidebar = () => {
             <nav className = {isActive ? "mobile-show" : ""}>
                 <NavLink exact="true" activeclassname="active" to="/" onClick={() => setIsActive(false)}>
                     <FontAwesomeIcon icon={faHome} onClick={() => setIsActive(false)} />
+                </NavLink>
+                <NavLink exact="true" activeclassname="active" to="/search" onClick={() => setIsActive(false)}>
+                    <FontAwesomeIcon icon={faSearch} onClick={() => setIsActive(false)} />
                 </NavLink>
 
             </nav>
