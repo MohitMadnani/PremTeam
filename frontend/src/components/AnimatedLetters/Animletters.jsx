@@ -1,29 +1,38 @@
 import { motion } from 'framer-motion';
 import './index.scss';
+import { letterVariants } from '../../animations/textAnimations';
 
 const AnimatedLetters = ({ strArray, idx }) => {
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
+        }
+    };
+
     return (
-        <span>
+        <motion.span
+            className="text-animate"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
             {strArray.map((char, i) => (
-                <motion.span 
+                <motion.span
                     key={char + i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
-                        duration: 0.5,
-                        delay: (i + idx) * 0.1 
-                    }}
-                    whileHover={{ 
-                        color: "#ffd700",
-                        scale: 1.2,
-                        transition: { duration: 0.2 } 
-                    }}
-                    className="animated-letter"
+                    className={`text-animate-item`}
+                    variants={letterVariants}
+                    whileHover="hover"
+                    custom={i + idx}
                 >
                     {char}
                 </motion.span>
             ))}
-        </span>
+        </motion.span>
     );
 };
 

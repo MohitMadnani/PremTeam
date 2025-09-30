@@ -1,13 +1,19 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import Loader from "react-loaders";
+import AnimatedLetters from "../AnimatedLetters/Animletters";
+import { motion } from "framer-motion";
+import { fadeInVariants } from "../../animations/elementAnimations";
+import { cardContainerVariants, cardVariants } from "../../animations/cardAnimations";
 import axios from "axios";
-import AnimatedLetters from "../AnimatedLetters/AnimatedLetters";
-
 
 const TeamData = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [playerData, setPlayerData] = useState([]);
     const [playersToShow, setPlayersToShow] = useState(10);
+    const [searchParams] = useSearchParams();
+    const teamName = searchParams.get('team');
     const [letterClass] = useState('text-animate');
 
     useEffect(() => {
@@ -18,12 +24,25 @@ const TeamData = () => {
         const nameVal = params.get('name');
 
         if (teamVal) {
-            axios.get(`http://localhost:8080/api/v1/player?team=${encodeURIComponent(teamVal)}`)
+            const decodedTeamName = decodeURIComponent(teamVal);
+            const formattedTeamName = decodedTeamName.replace(/\s+/g, '-');
+            const finalUrl = `http://localhost:8080/api/v1/player?team=${formattedTeamName}`;
+            
+            console.log('Original teamVal:', teamVal);
+            console.log('Decoded team name:', decodedTeamName);
+            console.log('Formatted team name:', formattedTeamName);
+            console.log('Final URL being called:', finalUrl);
+
+            axios.get(finalUrl)
                 .then(response => {
+                    console.log('API Response:', response.data);
+                    console.log('Number of players:', response.data.length);
                     setPlayerData(response.data);
                     setLoading(false);
                 })
                 .catch(error => {
+                    console.error('API Error:', error);
+                    console.error('Error details:', error.response);
                     setError('Error fetching player data');
                     setLoading(false);
                 });
@@ -62,70 +81,70 @@ const TeamData = () => {
             else {
             setLoading(false);
          }
-    }, []);
+    }, [searchParams]);
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    const loadMorePlayers = () => {
+        setPlayersToShow(prev => prev + 10);
+    };
 
-    if (error) {
-        return <div>{error}</div>;
-    }
+    if (loading) return <div className="loading">Loading...</div>;
+    if (error) return <div className="error">{error}</div>;
 
     return (
-    <div className={`fade-in ${loading ? 'loading' : ''}`}>
-    <div className="table-container">
-      <h1 className = "page-title">
-        <AnimatedLetters letterClass = {letterClass} strArray={"Player Data".split("")} idx={12}/>
-      </h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Age</th>
-            <th>Matches Played</th>
-            <th>Starts</th>
-            <th>Minutes Played</th>
-            <th>Goals</th>
-            <th>Assists</th>
-            <th>Penalties Kicked</th>
-            <th>Yellow Cards</th>
-            <th>Red Cards</th>
-            <th>Expected Goals (xG)</th>
-            <th>Expected Assists (xAG)</th>
-            <th>Team</th>
-          </tr>
-        </thead>
-        <tbody>
-          {playerData.slice(0, playersToShow).map(player => (
-            <tr key={player.name}>
-              <td>{player.name}</td>
-              <td>{player.pos}</td>
-              <td>{player.age}</td>
-              <td>{player.mp}</td>
-              <td>{player.starts}</td>
-              <td>{player.min}</td>
-              <td>{player.gls}</td>
-              <td>{player.ast}</td>
-              <td>{player.pk}</td>
-              <td>{player.crdy}</td>
-              <td>{player.crdr}</td>
-              <td>{player.xg}</td>
-              <td>{player.xag}</td>
-              <td>{player.team}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {playersToShow < playerData.length && (
-        <button onClick={() => setPlayersToShow(playersToShow + 10)} style={{ marginTop: '10px', marginBottom: '10px' }} className={`show-more-button ${loading ? 'loading' : ''}`}>
-          Show More
-        </button>
-      )}
-    </div>
-    </div>
-  );
+        <>
+            <div className="container team-data-page">
+                <h1 className="page-title">
+                    <AnimatedLetters letterClass = {letterClass} strArray={(teamName || "Team Data").split("")} idx={15}/>
+                </h1>
+                
+                <motion.div
+                    className="player-container"
+                    variants={cardContainerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    {playerData.slice(0, playersToShow).map((player, idx) => (
+                        <motion.div
+                            key={idx}
+                            className="player-card"
+                            variants={cardVariants}
+                            whileHover="hover"
+                        >
+                            <h3>{player.name}</h3>
+                            <p>Position: {player.pos}</p>
+                            <p>Age: {player.age}</p>
+                            <p>Matches Played: {player.mp}</p>
+                            <p>Starts: {player.starts}</p>
+                            <p>Minutes Played: {player.min}</p>
+                            <p>Goals: {player.gls}</p>
+                            <p>Assists: {player.ast}</p>
+                            <p>Penalties Kicked: {player.pk}</p>
+                            <p>Yellow Cards: {player.crdy}</p>
+                            <p>Red Cards: {player.crdr}</p>
+                            <p>Expected Goals (xG): {player.xg}</p>
+                            <p>Expected Assists (xAG): {player.xag}</p>
+                            <p>Team: {player.team}</p>
+                        </motion.div>
+                    ))}
+                </motion.div>
+                
+                {playerData.length > playersToShow && (
+                    <motion.button
+                        className="load-more"
+                        onClick={loadMorePlayers}
+                        variants={fadeInVariants}
+                        initial="hidden"
+                        animate="visible"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        Load More
+                    </motion.button>
+                )}
+            </div>
+            <Loader type="pacman"/>
+        </>
+    );
 };
 
 export default TeamData;
