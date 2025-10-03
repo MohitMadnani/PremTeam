@@ -7,6 +7,8 @@ import { fadeInVariants } from "../../animations/elementAnimations";
 import { cardContainerVariants, cardVariants } from "../../animations/cardAnimations";
 import axios from "axios";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
 const TeamData = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -26,7 +28,7 @@ const TeamData = () => {
         if (teamVal) {
             const decodedTeamName = decodeURIComponent(teamVal);
             const formattedTeamName = decodedTeamName.replace(/\s+/g, '-');
-            const finalUrl = `http://localhost:8080/api/v1/player?team=${formattedTeamName}`;
+            const finalUrl = `${API_BASE_URL}/api/v1/player?team=${formattedTeamName}`;
             
             console.log('Original teamVal:', teamVal);
             console.log('Decoded team name:', decodedTeamName);
@@ -47,7 +49,7 @@ const TeamData = () => {
                     setLoading(false);
                 });
         } else if (nationVal) {
-            axios.get(`http://localhost:8080/api/v1/player?nation=${encodeURIComponent(nationVal)}`)
+            axios.get(`${API_BASE_URL}/api/v1/player?nation=${encodeURIComponent(nationVal)}`)
                 .then(response => {
                     setPlayerData(response.data);
                     setLoading(false);
@@ -57,7 +59,7 @@ const TeamData = () => {
                     setLoading(false);
                 });
         } else if (posVal) {
-            axios.get(`http://localhost:8080/api/v1/player?position=${encodeURIComponent(posVal)}`)
+            axios.get(`${API_BASE_URL}/api/v1/player?position=${encodeURIComponent(posVal)}`)
                 .then(response => {
                     setPlayerData(response.data);
                     setLoading(false);
@@ -68,7 +70,7 @@ const TeamData = () => {
                 });
 
         } else if (nameVal) {
-            axios.get(`http://localhost:8080/api/v1/player?name=${encodeURIComponent(nameVal)}`)
+            axios.get(`${API_BASE_URL}/api/v1/player?name=${encodeURIComponent(nameVal)}`)
                 .then(response => {
                     setPlayerData(response.data);
                     setLoading(false);
