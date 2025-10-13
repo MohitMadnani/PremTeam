@@ -1,63 +1,62 @@
 package com.pt.premier_team.player;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name = "player_data")
+@Table(name = "player_table")
+@IdClass(PlayerId.class)
 public class Player {
     @Id
-    @Column(name = "player_name", unique = true)
+    @Column(name = "\"Name\"")
     private String playerName;
 
-    @Column(name = "nation")
+    @Id
+    @Column(name = "\"Team\"")
+    private String team;
+
+    @Column(name = "\"Nation\"")
     private String nation;
 
-    @Column(name = "position")
+    @Column(name = "\"Pos\"")
     private String pos;
 
-    @Column(name = "age")
+    @Column(name = "\"Age\"")
     private Integer age;
 
-    @Column(name = "matches_played")
+    @Column(name = "\"MP\"")
     private Integer mp;
 
-    @Column(name = "starts")
+    @Column(name = "\"Starts\"")
     private Integer starts;
 
-    @Column(name = "minutes_played")
-    private Double min;
+    @Column(name = "\"Min\"")
+    private Integer min;
 
-    @Column(name = "goals")
-    private Double gls;
+    @Column(name = "\"Gls\"")
+    private Integer gls;
 
-    @Column(name = "assists")
-    private Double ast;
+    @Column(name = "\"Ast\"")
+    private Integer ast;
 
-    @Column(name = "penalties_scored")
-    private Double pk;
+    @Column(name = "\"PK\"")
+    private Integer pk;
 
-    @Column(name = "yellow_cards")
-    private Double crdy;
+    @Column(name = "\"CrdY\"")
+    private Integer crdy;
 
-    @Column(name = "red_cards")
-    private Double crdr;
+    @Column(name = "\"CrdR\"")
+    private Integer crdr;
 
-    @Column(name = "expected_goals")
+    @Column(name = "\"xG\"")
     private Double xg;
 
-    @Column(name = "expected_assists")
+    @Column(name = "\"xAG\"")
     private Double xag;
-
-    @Column(name = "team_name")
-    private String team;
 
     public Player() {
     }
 
-    public Player(String playerName, String nation, String pos, Integer age, Integer mp, Integer starts, Double min, Double gls, Double ast, Double pk, Double crdy, Double crdr, Double xg, Double xag, String team) {
+    public Player(String playerName, String nation, String pos, Integer age, Integer mp, Integer starts, Integer min, Integer gls, Integer ast, Integer pk, Integer crdy, Integer crdr, Double xg, Double xag, String team) {
         this.playerName = playerName;
         this.nation = nation;
         this.pos = pos;
@@ -123,51 +122,51 @@ public class Player {
         this.starts = starts;
     }
 
-    public Double getMin() {
+    public Integer getMin() {
         return min;
     }
 
-    public void setMin(Double min) {
+    public void setMin(Integer min) {
         this.min = min;
     }
 
-    public Double getGls() {
+    public Integer getGls() {
         return gls;
     }
 
-    public void setGls(Double gls) {
+    public void setGls(Integer gls) {
         this.gls = gls;
     }
 
-    public Double getAst() {
+    public Integer getAst() {
         return ast;
     }
 
-    public void setAst(Double ast) {
+    public void setAst(Integer ast) {
         this.ast = ast;
     }
 
-    public Double getPk() {
+    public Integer getPk() {
         return pk;
     }
 
-    public void setPk(Double pk) {
+    public void setPk(Integer pk) {
         this.pk = pk;
     }
 
-    public Double getCrdy() {
+    public Integer getCrdy() {
         return crdy;
     }
 
-    public void setCrdy(Double crdy) {
+    public void setCrdy(Integer crdy) {
         this.crdy = crdy;
     }
 
-    public Double getCrdr() {
+    public Integer getCrdr() {
         return crdr;
     }
 
-    public void setCrdr(Double crdr) {
+    public void setCrdr(Integer crdr) {
         this.crdr = crdr;
     }
 
@@ -195,6 +194,11 @@ public class Player {
         this.team = team;
     }
 
+    public String getName() {
+        return playerName;
+    }
 
-
+    public void setName(String name) {
+        this.playerName = name;
+    }
 }

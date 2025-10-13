@@ -2,13 +2,12 @@ package com.pt.premier_team.player;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-@Component
+@Service
 public class PlayerService {
     private final PlayerRepository playerRepository;
 
@@ -22,60 +21,74 @@ public class PlayerService {
     }
 
     public List<Player> getPlayersByTeam(String teamName) {
-        return playerRepository.findAll().stream()
-                .filter(player -> teamName.equals(player.getTeam()))
-                .collect(Collectors.toList());
+        return playerRepository.findByTeam(teamName);
     }
 
     public List<Player> getPlayersByName(String playerName) {
-        return playerRepository.findAll().stream()
-                .filter(player -> player.getPlayerName().toLowerCase().contains(playerName.toLowerCase()))
-                .collect(Collectors.toList());
-
+        return playerRepository.findByPlayerNameContainingIgnoreCase(playerName);
     }
 
     public List<Player> getPlayersByPos(String pos) {
-        return playerRepository.findAll().stream()
-                .filter(player -> player.getPos().toLowerCase().contains(pos.toLowerCase()))
-                .collect(Collectors.toList());
+        return playerRepository.findByPositionContaining(pos);
     }
 
     public List<Player> getPlayersByNation(String nation) {
-        return playerRepository.findAll().stream()
-                .filter(player -> player.getNation().toLowerCase().contains(nation.toLowerCase()))
-                .collect(Collectors.toList());
+        return playerRepository.findByNation(nation);
     }
 
     public List<Player> getPlayersByTeamAndPos(String team, String pos) {
-        return playerRepository.findAll().stream()
-                .filter(player -> player.getTeam().equals(team) && player.getPos().equals(pos))
-                .collect(Collectors.toList());
+        return playerRepository.findByTeamAndPositionContaining(team, pos);
+    }
+
+    public List<String> getAllTeams() {
+        return playerRepository.findAllTeams();
+    }
+
+    public List<String> getAllPositions() {
+        return playerRepository.findAllPositions();
     }
 
     public Player addPlayer(Player player) {
-        playerRepository.save(player);
-        return player;
+        return playerRepository.save(player);
     }
 
-    public Player updatePlayer(Player newPlayer) {
-        Optional<Player> existPlayer = playerRepository.findByPlayerName(newPlayer.getPlayerName());
+    public Player updatePlayer(String playerName, String team, Player newPlayer) {
+        PlayerId playerId = new PlayerId(playerName, team);
+        Optional<Player> existingPlayer = playerRepository.findById(playerId);
 
-        if (existPlayer.isPresent()) {
-            Player playerUpdate = existPlayer.get();
-            playerUpdate.setPlayerName(newPlayer.getPlayerName());
+        if (existingPlayer.isPresent()) {
+            Player playerUpdate = existingPlayer.get();
             playerUpdate.setNation(newPlayer.getNation());
             playerUpdate.setPos(newPlayer.getPos());
-            playerUpdate.setTeam(newPlayer.getTeam());
+            playerUpdate.setAge(newPlayer.getAge());
+            playerUpdate.setMp(newPlayer.getMp());
+            playerUpdate.setStarts(newPlayer.getStarts());
+            playerUpdate.setMin(newPlayer.getMin());
+            playerUpdate.setGls(newPlayer.getGls());
+            playerUpdate.setAst(newPlayer.getAst());
+            playerUpdate.setPk(newPlayer.getPk());
+            playerUpdate.setCrdy(newPlayer.getCrdy());
+            playerUpdate.setCrdr(newPlayer.getCrdr());
+            playerUpdate.setXg(newPlayer.getXg());
+            playerUpdate.setXag(newPlayer.getXag());
 
-            playerRepository.save(playerUpdate);
-            return playerUpdate;
+            return playerRepository.save(playerUpdate);
         }
         return null;
     }
 
     @Transactional
-    public void deletePlayer(String playerName) {
-        playerRepository.deleteByPlayerName(playerName);
+    public void deletePlayer(String playerName, String team) {
+        PlayerId playerId = new PlayerId(playerName, team);
+        playerRepository.deleteById(playerId);
     }
 
+    public Optional<Player> getPlayerByNameAndTeam(String playerName, String team) {
+        PlayerId playerId = new PlayerId(playerName, team);
+        return playerRepository.findById(playerId);
+    }
+
+    public long getTotalPlayerCount() {
+        return playerRepository.count();
+    }
 }
