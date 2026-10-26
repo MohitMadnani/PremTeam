@@ -6,32 +6,27 @@ import { letterContainerVariants, letterVariants } from "../../animations/textAn
 import { fadeInVariants } from "../../animations/elementAnimations";
 import { cardContainerVariants, cardVariants } from "../../animations/cardAnimations";
 import { buttonVariants } from "../../animations/elementAnimations";
-import teamData from "../../jsondata/team.json";
+import axios from "axios";
 import './index.scss';
+
+import { API_BASE_URL } from "../../api";
 
 const Team = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredTeams, setFilteredTeams] = useState([]);
+    const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        try {
-            if (teamData && teamData.teams) {
-                const filtered = teamData.teams.filter(team =>
-                    team.name.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-                setFilteredTeams(filtered);
-            } else {
-                setError("Team data has incorrect format");
-            }
-        } catch (err) {
-            console.error("Error processing teams data:", err);
-            setError("Error processing teams data");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [searchTerm]);
+        axios.get(`${API_BASE_URL}/api/v1/player/teams`)
+            .then(response => setTeams(response.data))
+            .catch(() => setError("Could not load teams"))
+            .finally(() => setIsLoading(false));
+    }, []);
+
+    const filteredTeams = teams.filter(team =>
+        team.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
@@ -105,17 +100,17 @@ const Team = () => {
                         initial="hidden"
                         animate="visible"
                     >
-                        {filteredTeams.map((team) => (
+                        {filteredTeams.map(({ name, code }) => (
                             <motion.div 
-                                key={team.id}
+                                key={name}
                                 className="team-card"
                                 variants={cardVariants}
                                 whileHover="hover"
                             >
-                                <img src={team.logo} alt={team.name} />
-                                <h3>{team.name}</h3>
+                                <img src={`https://resources.premierleague.com/premierleague/badges/70/t${code}.png`} alt={name} />
+                                <h3>{name}</h3>
                                 <motion.div className="btn-container" whileHover="hover" variants={buttonVariants}>
-                                    <Link to={`/teamdata?team=${encodeURIComponent(team.name)}`}>
+                                    <Link to={`/teamdata?team=${encodeURIComponent(name)}`}>
                                         VIEW TEAM
                                     </Link>
                                 </motion.div>

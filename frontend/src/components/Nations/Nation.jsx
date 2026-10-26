@@ -2,68 +2,55 @@ import { useState, useEffect } from "react";
 import Loader from "react-loaders";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { letterContainerVariants, letterVariants } from "../../animations/textAnimations";
-import { fadeInVariants } from "../../animations/elementAnimations";
-import { cardContainerVariants, cardVariants } from "../../animations/cardAnimations";
-import { buttonVariants } from "../../animations/elementAnimations";
+import axios from "axios";
 import ReactCountryFlag from "react-country-flag";
-import nationsData from "../../jsondata/nation.json";
+import { letterContainerVariants, letterVariants } from "../../animations/textAnimations";
+import { fadeInVariants, buttonVariants } from "../../animations/elementAnimations";
+import { cardContainerVariants, cardVariants } from "../../animations/cardAnimations";
+import { API_BASE_URL } from "../../api";
+import countries from "../../jsondata/countries.json";
 import "./index.scss";
 
 const Nations = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredNations, setFilteredNations] = useState([]);
+    const [nations, setNations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        try {
-            if (nationsData && nationsData.nations) {
-                const filtered = nationsData.nations.filter(nation =>
-                    nation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    nation.search.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-                setFilteredNations(filtered);
-            } else {
-                setError("Nation data has incorrect format");
-            }
-        } catch (err) {
-            console.error("Error processing nations data:", err);
-            setError("Error processing nations data");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [searchTerm]);
+        axios.get(`${API_BASE_URL}/api/v1/player/nations`)
+            .then(response => setNations(response.data.map(({ code, players }) => ({
+                code,
+                players,
+                name: countries[code]?.name ?? code,
+                flag: countries[code]?.flag,
+            }))))
+            .catch(() => setError("Could not load nations"))
+            .finally(() => setIsLoading(false));
+    }, []);
 
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-    };
+    const term = searchTerm.toLowerCase();
+    const filteredNations = nations.filter(nation =>
+        nation.name.toLowerCase().includes(term) || nation.code.toLowerCase().includes(term)
+    );
 
-    const handleClearSearch = () => {
-        setSearchTerm('');
-    };
-    
     return (
         <>
             <div className="container nations-page">
-                <motion.h1 
+                <motion.h1
                     className="page-title"
                     variants={letterContainerVariants}
                     initial="hidden"
                     animate="visible"
                 >
                     {"Nations".split("").map((letter, i) => (
-                        <motion.span
-                            key={i}
-                            variants={letterVariants}
-                            whileHover="hover"
-                        >
+                        <motion.span key={i} variants={letterVariants} whileHover="hover">
                             {letter}
                         </motion.span>
                     ))}
                 </motion.h1>
 
-                <motion.div 
+                <motion.div
                     className="search-bar"
                     variants={fadeInVariants}
                     initial="hidden"
@@ -74,12 +61,12 @@ const Nations = () => {
                         type="text"
                         placeholder="Search for nations"
                         value={searchTerm}
-                        onChange={handleSearchChange}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     {searchTerm && (
                         <motion.button
                             className="clear-search"
-                            onClick={handleClearSearch}
+                            onClick={() => setSearchTerm('')}
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                         >
@@ -93,48 +80,40 @@ const Nations = () => {
                 ) : error ? (
                     <div className="error">{error}</div>
                 ) : filteredNations.length === 0 ? (
-                    <motion.p 
-                        className="no-results"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                    >
+                    <motion.p className="no-results" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         No nations found matching "{searchTerm}"
                     </motion.p>
                 ) : (
-                    <motion.div 
+                    <motion.div
                         className="nations-container"
                         variants={cardContainerVariants}
                         initial="hidden"
                         animate="visible"
                     >
-                        {filteredNations.map((nation, index) => (
-                            <motion.div 
-                                key={index}
+                        {filteredNations.map((nation) => (
+                            <motion.div
+                                key={nation.code}
                                 className="nation-card"
                                 variants={cardVariants}
                                 whileHover="hover"
                             >
                                 <div className="flag-container">
-                                    <ReactCountryFlag
-                                        countryCode={nation.code}
-                                        svg
-                                        style={{
-                                          width: '200px', // Match the CSS width
-                                          height: 'auto'
-                                        }}
-                                        title={nation.name}
-                                        className="nation-flag"
-                                    />
+                                    {nation.flag && (
+                                        <ReactCountryFlag
+                                            countryCode={nation.flag}
+                                            svg
+                                            style={{ width: '200px', height: 'auto' }}
+                                            title={nation.name}
+                                            className="nation-flag"
+                                        />
+                                    )}
                                 </div>
                                 <h3>{nation.name}</h3>
-                                <motion.div 
-                                    whileHover="hover"
-                                    variants={buttonVariants}
-                                    className="btn-container"
-                                >
-                                    <Link to={`/nations/${nation.code}`}>
-                                        VIEW PLAYERS
-                                    </Link>
+                                <p className="nation-count">
+                                    {nation.players} {nation.players === 1 ? "player" : "players"}
+                                </p>
+                                <motion.div whileHover="hover" variants={buttonVariants} className="btn-container">
+                                    <Link to={`/teamdata?nation=${nation.code}`}>VIEW PLAYERS</Link>
                                 </motion.div>
                             </motion.div>
                         ))}

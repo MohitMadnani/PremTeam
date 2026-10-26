@@ -1,151 +1,160 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import Loader from "react-loaders";
-import AnimatedLetters from "../AnimatedLetters/Animletters";
 import { motion } from "framer-motion";
+import axios from "axios";
+import AnimatedLetters from "../AnimatedLetters/Animletters";
 import { fadeInVariants } from "../../animations/elementAnimations";
 import { cardContainerVariants, cardVariants } from "../../animations/cardAnimations";
-import axios from "axios";
+import { API_BASE_URL } from "../../api";
+import positions from "../../jsondata/position.json";
+import countries from "../../jsondata/countries.json";
+import "./index.scss";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const PAGE_SIZE = 12;
+const FILTERS = ["team", "nation", "position", "name"];
+
+const SORTS = {
+    min: { label: "Minutes played", compare: (a, b) => b.min - a.min },
+    gls: { label: "Goals", compare: (a, b) => b.gls - a.gls || b.ast - a.ast },
+    ast: { label: "Assists", compare: (a, b) => b.ast - a.ast || b.gls - a.gls },
+    xg: { label: "Expected goals", compare: (a, b) => b.xg - a.xg },
+    name: { label: "Name", compare: (a, b) => a.name.localeCompare(b.name) },
+};
+
+const positionTitle = (code) => positions.positions.find((p) => p.search === code)?.title ?? code;
+
+const pageTitle = (filter, value) => {
+    if (filter === "position") return positionTitle(value);
+    if (filter === "nation") return countries[value?.toUpperCase()]?.name ?? value;
+    if (filter === "name") return `"${value}"`;
+    return value || "Players";
+};
+
+const Stat = ({ label, value }) => (
+    <div className="stat">
+        <span className="stat-value">{value}</span>
+        <span className="stat-label">{label}</span>
+    </div>
+);
+
+const PlayerCard = ({ player }) => (
+    <motion.div className="player-card" variants={cardVariants} whileHover="hover">
+        <div className="player-head">
+            <div>
+                <h3>{player.name}</h3>
+                <p className="player-meta">
+                    {player.team} · {player.nation} · {player.age} yrs
+                </p>
+            </div>
+            <span className={`pos-badge pos-${player.pos}`}>{player.pos}</span>
+        </div>
+
+        <div className="key-stats">
+            <Stat label="Goals" value={player.gls} />
+            <Stat label="Assists" value={player.ast} />
+            <Stat label="xG" value={player.xg.toFixed(1)} />
+            <Stat label="xAG" value={player.xag.toFixed(1)} />
+        </div>
+
+        <dl className="detail-stats">
+            <div><dt>Played</dt><dd>{player.mp}</dd></div>
+            <div><dt>Starts</dt><dd>{player.starts}</dd></div>
+            <div><dt>Minutes</dt><dd>{player.min}</dd></div>
+            <div><dt>Yellow</dt><dd>{player.crdy}</dd></div>
+            <div><dt>Red</dt><dd>{player.crdr}</dd></div>
+            <div><dt>Pens missed</dt><dd>{player.pensMissed}</dd></div>
+        </dl>
+    </motion.div>
+);
 
 const TeamData = () => {
+    const [searchParams] = useSearchParams();
+    const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [playerData, setPlayerData] = useState([]);
-    const [playersToShow, setPlayersToShow] = useState(10);
-    const [searchParams] = useSearchParams();
-    const teamName = searchParams.get('team');
-    const [letterClass] = useState('text-animate');
+    const [visible, setVisible] = useState(PAGE_SIZE);
+    const [sort, setSort] = useState("min");
+
+    const filter = FILTERS.find((key) => searchParams.get(key));
+    const value = filter ? searchParams.get(filter) : null;
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const teamVal = params.get('team');
-        const nationVal = params.get('nation');
-        const posVal = params.get('position');
-        const nameVal = params.get('name');
-
-        if (teamVal) {
-            const decodedTeamName = decodeURIComponent(teamVal);
-            const formattedTeamName = decodedTeamName.replace(/\s+/g, '-');
-            const finalUrl = `${API_BASE_URL}/api/v1/player?team=${formattedTeamName}`;
-            
-            console.log('Original teamVal:', teamVal);
-            console.log('Decoded team name:', decodedTeamName);
-            console.log('Formatted team name:', formattedTeamName);
-            console.log('Final URL being called:', finalUrl);
-
-            axios.get(finalUrl)
-                .then(response => {
-                    console.log('API Response:', response.data);
-                    console.log('Number of players:', response.data.length);
-                    setPlayerData(response.data);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    console.error('API Error:', error);
-                    console.error('Error details:', error.response);
-                    setError('Error fetching player data');
-                    setLoading(false);
-                });
-        } else if (nationVal) {
-            axios.get(`${API_BASE_URL}/api/v1/player?nation=${encodeURIComponent(nationVal)}`)
-                .then(response => {
-                    setPlayerData(response.data);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    setError('Error fetching player data');
-                    setLoading(false);
-                });
-        } else if (posVal) {
-            axios.get(`${API_BASE_URL}/api/v1/player?position=${encodeURIComponent(posVal)}`)
-                .then(response => {
-                    setPlayerData(response.data);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    setError('Error fetching player data');
-                    setLoading(false);
-                });
-
-        } else if (nameVal) {
-            axios.get(`${API_BASE_URL}/api/v1/player?name=${encodeURIComponent(nameVal)}`)
-                .then(response => {
-                    setPlayerData(response.data);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    setError('Error fetching player data');
-                    setLoading(false);
-                });
-        } 
-            else {
+        if (!filter) {
             setLoading(false);
-         }
-    }, [searchParams]);
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        setVisible(PAGE_SIZE);
+        axios
+            .get(`${API_BASE_URL}/api/v1/player`, { params: { [filter]: value } })
+            .then((response) => setPlayers(response.data))
+            .catch(() => setError("Couldn't load players. Is the backend running?"))
+            .finally(() => setLoading(false));
+    }, [filter, value]);
 
-    const loadMorePlayers = () => {
-        setPlayersToShow(prev => prev + 10);
-    };
-
-    if (loading) return <div className="loading">Loading...</div>;
-    if (error) return <div className="error">{error}</div>;
+    const sorted = [...players].sort(SORTS[sort].compare);
 
     return (
-        <>
-            <div className="container team-data-page">
-                <h1 className="page-title">
-                    <AnimatedLetters letterClass = {letterClass} strArray={(teamName || "Team Data").split("")} idx={15}/>
-                </h1>
-                
-                <motion.div
-                    className="player-container"
-                    variants={cardContainerVariants}
-                    initial="hidden"
-                    animate="visible"
-                >
-                    {playerData.slice(0, playersToShow).map((player, idx) => (
-                        <motion.div
-                            key={idx}
-                            className="player-card"
-                            variants={cardVariants}
-                            whileHover="hover"
-                        >
-                            <h3>{player.name}</h3>
-                            <p>Position: {player.pos}</p>
-                            <p>Age: {player.age}</p>
-                            <p>Matches Played: {player.mp}</p>
-                            <p>Starts: {player.starts}</p>
-                            <p>Minutes Played: {player.min}</p>
-                            <p>Goals: {player.gls}</p>
-                            <p>Assists: {player.ast}</p>
-                            <p>Penalties Kicked: {player.pk}</p>
-                            <p>Yellow Cards: {player.crdy}</p>
-                            <p>Red Cards: {player.crdr}</p>
-                            <p>Expected Goals (xG): {player.xg}</p>
-                            <p>Expected Assists (xAG): {player.xag}</p>
-                            <p>Team: {player.team}</p>
-                        </motion.div>
-                    ))}
-                </motion.div>
-                
-                {playerData.length > playersToShow && (
-                    <motion.button
-                        className="load-more"
-                        onClick={loadMorePlayers}
-                        variants={fadeInVariants}
+        <div className="team-data-page">
+            <h1 className="page-title">
+                <AnimatedLetters
+                    letterClass="text-animate"
+                    strArray={pageTitle(filter, value).split("")}
+                    idx={15}
+                />
+            </h1>
+
+            {loading && <p className="status">Loading players…</p>}
+            {error && <p className="status error">{error}</p>}
+            {!loading && !error && !filter && (
+                <p className="status">Pick a team, nation or position to see players.</p>
+            )}
+            {!loading && !error && filter && players.length === 0 && (
+                <p className="status">No players found.</p>
+            )}
+
+            {!loading && !error && players.length > 0 && (
+                <>
+                    <div className="toolbar">
+                        <span>{players.length} players</span>
+                        <label>
+                            Sort by
+                            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                                {Object.entries(SORTS).map(([key, { label }]) => (
+                                    <option key={key} value={key}>{label}</option>
+                                ))}
+                            </select>
+                        </label>
+                    </div>
+
+                    <motion.div
+                        className="player-container"
+                        variants={cardContainerVariants}
                         initial="hidden"
                         animate="visible"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
                     >
-                        Load More
-                    </motion.button>
-                )}
-            </div>
-            <Loader type="pacman"/>
-        </>
+                        {sorted.slice(0, visible).map((player) => (
+                            <PlayerCard key={player.id} player={player} />
+                        ))}
+                    </motion.div>
+
+                    {sorted.length > visible && (
+                        <motion.button
+                            className="load-more"
+                            onClick={() => setVisible((n) => n + PAGE_SIZE)}
+                            variants={fadeInVariants}
+                            initial="hidden"
+                            animate="visible"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            Show more ({sorted.length - visible} left)
+                        </motion.button>
+                    )}
+                </>
+            )}
+        </div>
     );
 };
 

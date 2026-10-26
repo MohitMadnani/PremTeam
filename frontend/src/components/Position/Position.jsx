@@ -114,10 +114,10 @@ const Positions = () => {
                                     whileHover="hover"
                                 >
                                     <div className="position-card-content">
-                                        <h3>{position.name || position.search}</h3>
+                                        <h3>{position.title || position.search}</h3>
                                         {position.cover && (
                                             <div className="position-image">
-                                                <img src={position.cover} alt={position.name || position.search} />
+                                                <img src={position.cover} alt={position.title || position.search} />
                                             </div>
                                         )}
                                         <motion.div

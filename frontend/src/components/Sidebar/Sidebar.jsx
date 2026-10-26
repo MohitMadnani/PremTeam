@@ -1,117 +1,55 @@
 import LogoPL from "../../assets/images/PL.webp"
-import { Link, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome, faUsers, faFlag, faSearch, faTshirt } from "@fortawesome/free-solid-svg-icons";
 import { motion } from "framer-motion";
 import "./index.scss";
 import { logoVariants } from "../../animations/elementAnimations";
 
+const LINKS = [
+    { to: "/", label: "Home", icon: faHome },
+    { to: "/teams", label: "Teams", icon: faUsers },
+    { to: "/nations", label: "Nations", icon: faFlag },
+    { to: "/positions", label: "Positions", icon: faTshirt },
+    { to: "/search", label: "Search", icon: faSearch },
+];
+
 const Sidebar = () => {
-    const [isActive, setIsActive] = useState(false);
-    
-    const iconTextVariants = {
-        hidden: { opacity: 0, y: 10 },
-        hover: { 
-            opacity: 1, 
-            y: 0,
-            transition: { duration: 0.2 }
-        }
-    };
+    const [isOpen, setIsOpen] = useState(false);
+    const { pathname } = useLocation();
+
+    // Close the mobile menu whenever the page changes.
+    useEffect(() => setIsOpen(false), [pathname]);
 
     return (
-        <div className="nav-bar">
-            <Link className="logo" to="/">
-                <motion.img 
-                    src={LogoPL} 
-                    alt="Logo"
-                    variants={logoVariants}
-                    whileHover="hover"
-                />
+        <header className="nav-bar">
+            <Link className="logo" to="/" aria-label="Home">
+                <motion.img src={LogoPL} alt="Premier League" variants={logoVariants} whileHover="hover" />
             </Link>
-            
-            <nav className={isActive ? "mobile-show" : ""}>
-                <NavLink exact="true" activeclassname="active" to="/" onClick={() => setIsActive(false)}>
-                    <motion.div className="nav-item">
-                        <FontAwesomeIcon icon={faHome} />
-                        <motion.span
-                            className="icon-text"
-                            variants={iconTextVariants}
-                            initial="hidden"
-                            whileHover="hover"
-                        >
-                            HOME
-                        </motion.span>
-                    </motion.div>
-                </NavLink>
-                
-                <NavLink exact="true" activeclassname="active" to="/teams" onClick={() => setIsActive(false)}>
-                    <motion.div className="nav-item">
-                        <FontAwesomeIcon icon={faUsers} />
-                        <motion.span
-                            className="icon-text"
-                            variants={iconTextVariants}
-                            initial="hidden"
-                            whileHover="hover"
-                        >
-                            TEAMS
-                        </motion.span>
-                    </motion.div>
-                </NavLink>
-                
-                <NavLink exact="true" activeclassname="active" to="/nations" onClick={() => setIsActive(false)}>
-                    <motion.div className="nav-item">
-                        <FontAwesomeIcon icon={faFlag} />
-                        <motion.span
-                            className="icon-text"
-                            variants={iconTextVariants}
-                            initial="hidden"
-                            whileHover="hover"
-                        >
-                            NATIONS
-                        </motion.span>
-                    </motion.div>
-                </NavLink>
 
-
-                <NavLink exact="true" activeclassname="active" to="/positions" onClick={() => setIsActive(false)}>
-                    <motion.div className="nav-item">
-                        <FontAwesomeIcon icon={faTshirt} />
-                        <motion.span
-                            className="icon-text"
-                            variants={iconTextVariants}
-                            initial="hidden"
-                            whileHover="hover"
-                        >
-                            POSITION
-                        </motion.span>
-                    </motion.div>
-                </NavLink>
-
-                <NavLink exact="true" activeclassname="active" to="/search" onClick={() => setIsActive(false)}>
-                    <motion.div className="nav-item">
-                        <FontAwesomeIcon icon={faSearch} />
-                        <motion.span
-                            className="icon-text"
-                            variants={iconTextVariants}
-                            initial="hidden"
-                            whileHover="hover"
-                        >
-                            SEARCH
-                        </motion.span>
-                    </motion.div>
-                </NavLink>
+            <nav id="main-nav" aria-label="Main" className={isOpen ? "open" : ""}>
+                {LINKS.map(({ to, label, icon }) => (
+                    <NavLink key={to} to={to} end={to === "/"}>
+                        <FontAwesomeIcon icon={icon} />
+                        <span>{label}</span>
+                    </NavLink>
+                ))}
             </nav>
-            
-            <div 
-                className="hamburger-icon"
-                onClick={() => setIsActive(!isActive)}
+
+            <button
+                type="button"
+                className={`hamburger-icon${isOpen ? " active" : ""}`}
+                aria-label="Menu"
+                aria-expanded={isOpen}
+                aria-controls="main-nav"
+                onClick={() => setIsOpen(!isOpen)}
             >
-                <span className={isActive ? "active" : ""}></span>
-                <span className={isActive ? "active" : ""}></span>
-                <span className={isActive ? "active" : ""}></span>
-            </div>
-        </div>
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </header>
     )
 }
 

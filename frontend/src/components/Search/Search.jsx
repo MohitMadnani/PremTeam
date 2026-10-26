@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Loader from "react-loaders";
 import { motion } from "framer-motion";
 import AnimatedLetters from "../AnimatedLetters/Animletters";
@@ -8,6 +9,7 @@ import { buttonVariants } from "../../animations/elementAnimations";
 const Search = () => {
     const [letterClass, setLetterClass] = useState('text-animate')
     const [searchQuery, setSearchQuery] = useState('')
+    const navigate = useNavigate()
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -22,8 +24,10 @@ const Search = () => {
         setSearchQuery(event.target.value)
     }
 
-    const handleGoButtonClick = () => {
-        window.location.href = `/data?name=${encodeURIComponent(searchQuery)}`
+    const handleSubmit = event => {
+        event.preventDefault()
+        const query = searchQuery.trim()
+        if (query) navigate(`/teamdata?name=${encodeURIComponent(query)}`)
     }
 
     return (
@@ -34,7 +38,8 @@ const Search = () => {
                     <br/>
                     <AnimatedLetters letterClass={letterClass} strArray={"Search".split("")} idx={15} />
                 </h1>
-                <motion.div 
+                <motion.form
+                    onSubmit={handleSubmit}
                     className="search-bar"
                     variants={fadeInVariants}
                     initial="hidden"
@@ -47,15 +52,15 @@ const Search = () => {
                         value={searchQuery}
                         onChange={handleSearchChange}
                     />
-                    <motion.button 
-                        onClick={handleGoButtonClick}
+                    <motion.button
+                        type="submit"
                         variants={buttonVariants}
                         whileHover="hover"
                         whileTap={{ scale: 0.95 }}
                     >
                         Go
                     </motion.button>
-                </motion.div>
+                </motion.form>
             </div>
             <Loader type="pacman" />
         </>

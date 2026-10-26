@@ -29,3 +29,11 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+
+.env
+DataScraping/data/
+DataScraping/old-stats-2024-25.csv
+.agents/
+.claude/
+node_modules/
+.claude/

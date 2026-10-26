@@ -1,5 +1,5 @@
 .nations-page {
-  padding-top: 100px;
+  padding-top: calc(var(--nav-height) + 28px);
   min-height: 100vh;
   background-color: #f5f5dc;
   
@@ -109,6 +109,12 @@
         }
       }
       
+      .nation-count {
+        margin: -10px 0 16px;
+        font-size: 13px;
+        color: #777;
+      }
+
       h3 {
         margin: 15px 0 20px;
         color: #000000;
