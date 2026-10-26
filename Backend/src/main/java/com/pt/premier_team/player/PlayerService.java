@@ -1,94 +1,39 @@
 package com.pt.premier_team.player;
 
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PlayerService {
     private final PlayerRepository playerRepository;
 
-    @Autowired
     public PlayerService(PlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
     }
 
-    public List<Player> getPlayers() {
+    /** Applies the first non-blank filter, in the order team, nation, position, name; no filter returns everyone. */
+    public List<Player> findPlayers(String team, String nation, String position, String name) {
+        if (hasText(team)) return playerRepository.findByTeam(team);
+        if (hasText(nation)) return playerRepository.findByNationIgnoreCase(nation);
+        if (hasText(position)) return playerRepository.findByPosIgnoreCase(position);
+        if (hasText(name)) return playerRepository.findByNameContainingIgnoreCase(name);
         return playerRepository.findAll();
     }
 
-    public List<Player> getPlayersByTeam(String teamName) {
-        return playerRepository.findByTeam(teamName);
-    }
-
-    public List<Player> getPlayersByName(String playerName) {
-        return playerRepository.findByPlayerNameContainingIgnoreCase(playerName);
-    }
-
-    public List<Player> getPlayersByPos(String pos) {
-        return playerRepository.findByPositionContaining(pos);
-    }
-
-    public List<Player> getPlayersByNation(String nation) {
-        return playerRepository.findByNation(nation);
-    }
-
-    public List<Player> getPlayersByTeamAndPos(String team, String pos) {
-        return playerRepository.findByTeamAndPositionContaining(team, pos);
-    }
-
-    public List<String> getAllTeams() {
+    public List<TeamInfo> getAllTeams() {
         return playerRepository.findAllTeams();
+    }
+
+    public List<NationInfo> getAllNations() {
+        return playerRepository.findAllNations();
     }
 
     public List<String> getAllPositions() {
         return playerRepository.findAllPositions();
     }
 
-    public Player addPlayer(Player player) {
-        return playerRepository.save(player);
-    }
-
-    public Player updatePlayer(String playerName, String team, Player newPlayer) {
-        PlayerId playerId = new PlayerId(playerName, team);
-        Optional<Player> existingPlayer = playerRepository.findById(playerId);
-
-        if (existingPlayer.isPresent()) {
-            Player playerUpdate = existingPlayer.get();
-            playerUpdate.setNation(newPlayer.getNation());
-            playerUpdate.setPos(newPlayer.getPos());
-            playerUpdate.setAge(newPlayer.getAge());
-            playerUpdate.setMp(newPlayer.getMp());
-            playerUpdate.setStarts(newPlayer.getStarts());
-            playerUpdate.setMin(newPlayer.getMin());
-            playerUpdate.setGls(newPlayer.getGls());
-            playerUpdate.setAst(newPlayer.getAst());
-            playerUpdate.setPk(newPlayer.getPk());
-            playerUpdate.setCrdy(newPlayer.getCrdy());
-            playerUpdate.setCrdr(newPlayer.getCrdr());
-            playerUpdate.setXg(newPlayer.getXg());
-            playerUpdate.setXag(newPlayer.getXag());
-
-            return playerRepository.save(playerUpdate);
-        }
-        return null;
-    }
-
-    @Transactional
-    public void deletePlayer(String playerName, String team) {
-        PlayerId playerId = new PlayerId(playerName, team);
-        playerRepository.deleteById(playerId);
-    }
-
-    public Optional<Player> getPlayerByNameAndTeam(String playerName, String team) {
-        PlayerId playerId = new PlayerId(playerName, team);
-        return playerRepository.findById(playerId);
-    }
-
-    public long getTotalPlayerCount() {
-        return playerRepository.count();
+    private static boolean hasText(String s) {
+        return s != null && !s.isBlank();
     }
 }
