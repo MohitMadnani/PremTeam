@@ -71,7 +71,7 @@
         .text-area {
             padding: 10px 20px;
             box-sizing: border-box;
-            padding-top: 100px;
+            padding-top: calc(var(--nav-height) + 28px);
         }
     }
 }

@@ -1,5 +1,5 @@
 .positions-page {
-  padding-top: 100px;
+  padding-top: calc(var(--nav-height) + 28px);
   min-height: 100vh;
   background-color: #f5f5dc;
   
