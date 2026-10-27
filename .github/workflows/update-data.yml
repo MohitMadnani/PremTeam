@@ -1,0 +1,41 @@
+name: Update player data
+
+# Premier League games are played Friday to Monday, so refresh every 3 hours on those days (UTC).
+# Midweek rounds are not covered; use "Run workflow" in the Actions tab to refresh by hand.
+on:
+  schedule:
+    - cron: "0 */3 * * 5,6,0,1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: DataScraping
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: DataScraping/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Fetch the current season from the FPL API
+        run: python fetch.py
+
+      - name: Load it into Supabase
+        run: python load.py data/stats-*.csv
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
