@@ -29,11 +29,16 @@ public class Player {
     private String team;
     private Integer teamCode;
     private String season;
+    private Integer playerCode;
+    private Double price;
+    private Integer points;
+    private String status;
+    private String news;
 
     protected Player() {
     }
 
-    public Player(String id, String name, String nation, String pos, Integer age, Integer mp, Integer starts, Integer min, Integer gls, Integer ast, Integer pensMissed, Integer crdy, Integer crdr, Double xg, Double xag, String team, Integer teamCode, String season) {
+    public Player(String id, String name, String nation, String pos, Integer age, Integer mp, Integer starts, Integer min, Integer gls, Integer ast, Integer pensMissed, Integer crdy, Integer crdr, Double xg, Double xag, String team, Integer teamCode, String season, Integer playerCode, Double price, Integer points, String status, String news) {
         this.id = id;
         this.name = name;
         this.nation = nation;
@@ -52,6 +57,11 @@ public class Player {
         this.team = team;
         this.teamCode = teamCode;
         this.season = season;
+        this.playerCode = playerCode;
+        this.price = price;
+        this.points = points;
+        this.status = status;
+        this.news = news;
     }
 
     public String getId() {
@@ -124,5 +134,25 @@ public class Player {
 
     public String getSeason() {
         return season;
+    }
+
+    public Integer getPlayerCode() {
+        return playerCode;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public Integer getPoints() {
+        return points;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getNews() {
+        return news;
     }
 }

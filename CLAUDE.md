@@ -27,6 +27,8 @@ From `DataScraping/` (`pip install -r requirements.txt`): `python fetch.py`, the
 
 `.github/workflows/update-data.yml` runs both scripts every 3 hours Friday to Monday (UTC) plus on demand, using the `DATABASE_URL` repository secret. GitHub only runs scheduled workflows from the default branch (`master`), and the runners are IPv4-only, so the secret must be the Session pooler string.
 
+Per-season fantasy fields come from the same feed: `price` (millions), `points`, `status` (`a` available, `d` doubtful, `i` injured, `s` suspended, `u` unavailable, `n` not in squad) and the `news` note. `schema.sql` ends the `player_season` table definition with these and also has an `alter table ... add column if not exists` block to upgrade an existing database; run it before deploying a loader that writes them. Player photos are not stored: the frontend builds `resources.premierleague.com/premierleague/photos/players/250x250/p<player_code>.png` from `player_code` in the view and falls back to initials if the image is missing.
+
 The FPL API has no penalties scored (stored as `pens_missed`) and gives nationality as a region id, resolved through `/api/regions/`. Players are keyed on the FPL `code`, which is stable across seasons; team names are FPL's short names (`Man City`, `Spurs`) and `team.code` builds the badge URL.
 
 ## Commands

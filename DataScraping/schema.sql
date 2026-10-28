@@ -30,8 +30,18 @@ create table if not exists player_season (
   red         smallint,
   xg          numeric(6,2),
   xag         numeric(6,2),
+  price       numeric(4,1),              -- fantasy price in millions
+  points      smallint,                  -- fantasy points this season
+  status      text,                      -- a available, d doubtful, i injured, s suspended, u unavailable, n not in squad
+  news        text,                      -- injury or availability note
   primary key (player_id, team_id, season)
 );
+
+-- Upgrade for databases created before these columns existed (no-op on a fresh install).
+alter table player_season add column if not exists price  numeric(4,1);
+alter table player_season add column if not exists points smallint;
+alter table player_season add column if not exists status text;
+alter table player_season add column if not exists news   text;
 
 create index if not exists player_season_team_idx on player_season (team_id, season);
 create index if not exists player_name_idx on player (lower(name));
@@ -49,7 +59,9 @@ select
   ps.yellow as crdy, ps.red as crdr, ps.xg, ps.xag,
   t.name as team,
   t.code as team_code,
-  ps.season
+  ps.season,
+  p.code as player_code,
+  ps.price, ps.points, ps.status, ps.news
 from player_season ps
 join player p on p.id = ps.player_id
 join team t on t.id = ps.team_id

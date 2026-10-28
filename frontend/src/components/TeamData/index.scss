@@ -81,9 +81,33 @@ $ink: #000000;
 
     .player-head {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: 12px;
+
+      .player-title {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .player-photo {
+        flex-shrink: 0;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: top;
+        background: #eee;
+
+        &.placeholder {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: $ink;
+          color: $gold;
+          font-weight: 700;
+          font-size: 18px;
+        }
+      }
 
       h3 {
         margin: 0 0 4px;
@@ -108,6 +132,24 @@ $ink: #000000;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 1px;
+    }
+
+    .availability {
+      margin: -6px 0 0;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 1.35;
+      background: #fff3cd;
+      color: #7a5b00;
+
+      &.status-i,
+      &.status-s,
+      &.status-u,
+      &.status-n {
+        background: #fde2e2;
+        color: #9b1c1c;
+      }
     }
 
     .key-stats {
@@ -141,7 +183,7 @@ $ink: #000000;
 
     .detail-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px 8px;
       margin: 0;
 

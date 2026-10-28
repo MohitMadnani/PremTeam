@@ -87,6 +87,7 @@ All endpoints are `GET` and return JSON.
 ## Data notes
 
 - The Fantasy Premier League API only covers the current season and lists players who have played at least one minute.
+- Each player also has a photo, fantasy price and points, and an availability status (injured, doubtful, suspended) with the injury note.
 - It has no penalties scored, so the app shows penalties missed instead.
 - Matches played is counted from each player's match history.
 - Team names are the API's short names, such as "Man City" and "Spurs".

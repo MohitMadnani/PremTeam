@@ -36,16 +36,18 @@ def main(path):
 			cur.execute(
 				"""insert into player_season
 				     (player_id, team_id, season, position, mp, starts, minutes, goals, assists,
-				      pens_missed, yellow, red, xg, xag)
-				   select p.id, t.id, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+				      pens_missed, yellow, red, xg, xag, price, points, status, news)
+				   select p.id, t.id, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
 				   from player p, team t where p.code = %s and t.code = %s
 				   on conflict (player_id, team_id, season) do update set
 				     position = excluded.position, mp = excluded.mp, starts = excluded.starts,
 				     minutes = excluded.minutes, goals = excluded.goals, assists = excluded.assists,
 				     pens_missed = excluded.pens_missed, yellow = excluded.yellow, red = excluded.red,
-				     xg = excluded.xg, xag = excluded.xag""",
+				     xg = excluded.xg, xag = excluded.xag, price = excluded.price, points = excluded.points,
+				     status = excluded.status, news = excluded.news""",
 				(r["Season"], r["Pos"], py(r["MP"]), py(r["Starts"]), py(r["Min"]), py(r["Gls"]), py(r["Ast"]),
 				 py(r["PensMissed"]), py(r["CrdY"]), py(r["CrdR"]), py(r["xG"]), py(r["xAG"]),
+				 py(r["Price"]), py(r["Points"]), py(r["Status"]), py(r["News"]),
 				 py(r["Code"]), py(r["TeamCode"])),
 			)
 			# After a transfer FPL reports only the new club, so drop the old club's row for this season
