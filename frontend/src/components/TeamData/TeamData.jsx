@@ -18,6 +18,8 @@ const SORTS = {
     gls: { label: "Goals", compare: (a, b) => b.gls - a.gls || b.ast - a.ast },
     ast: { label: "Assists", compare: (a, b) => b.ast - a.ast || b.gls - a.gls },
     xg: { label: "Expected goals", compare: (a, b) => b.xg - a.xg },
+    points: { label: "Fantasy points", compare: (a, b) => b.points - a.points },
+    price: { label: "Price", compare: (a, b) => b.price - a.price },
     name: { label: "Name", compare: (a, b) => a.name.localeCompare(b.name) },
 };
 
@@ -30,6 +32,25 @@ const pageTitle = (filter, value) => {
     return value || "Players";
 };
 
+const STATUS_LABELS = { d: "Doubtful", i: "Injured", s: "Suspended", u: "Unavailable", n: "Not in squad" };
+
+const initials = (name) => name.split(" ").filter(Boolean).map((part) => part[0]).slice(0, 2).join("");
+
+const PlayerPhoto = ({ code, name }) => {
+    const [failed, setFailed] = useState(false);
+    return failed ? (
+        <div className="player-photo placeholder" aria-hidden="true">{initials(name)}</div>
+    ) : (
+        <img
+            className="player-photo"
+            src={`https://resources.premierleague.com/premierleague/photos/players/250x250/p${code}.png`}
+            alt={name}
+            loading="lazy"
+            onError={() => setFailed(true)}
+        />
+    );
+};
+
 const Stat = ({ label, value }) => (
     <div className="stat">
         <span className="stat-value">{value}</span>
@@ -40,7 +61,8 @@ const Stat = ({ label, value }) => (
 const PlayerCard = ({ player }) => (
     <motion.div className="player-card" variants={cardVariants} whileHover="hover">
         <div className="player-head">
-            <div>
+            <PlayerPhoto code={player.playerCode} name={player.name} />
+            <div className="player-title">
                 <h3>{player.name}</h3>
                 <p className="player-meta">
                     {player.team} · {player.nation} · {player.age} yrs
@@ -48,6 +70,13 @@ const PlayerCard = ({ player }) => (
             </div>
             <span className={`pos-badge pos-${player.pos}`}>{player.pos}</span>
         </div>
+
+        {player.status !== "a" && (
+            <p className={`availability status-${player.status}`}>
+                <strong>{STATUS_LABELS[player.status] ?? "Unavailable"}</strong>
+                {player.news && <span> · {player.news}</span>}
+            </p>
+        )}
 
         <div className="key-stats">
             <Stat label="Goals" value={player.gls} />
@@ -60,9 +89,11 @@ const PlayerCard = ({ player }) => (
             <div><dt>Played</dt><dd>{player.mp}</dd></div>
             <div><dt>Starts</dt><dd>{player.starts}</dd></div>
             <div><dt>Minutes</dt><dd>{player.min}</dd></div>
+            <div><dt>Points</dt><dd>{player.points}</dd></div>
             <div><dt>Yellow</dt><dd>{player.crdy}</dd></div>
             <div><dt>Red</dt><dd>{player.crdr}</dd></div>
             <div><dt>Pens missed</dt><dd>{player.pensMissed}</dd></div>
+            <div><dt>Price</dt><dd>£{player.price.toFixed(1)}m</dd></div>
         </dl>
     </motion.div>
 );

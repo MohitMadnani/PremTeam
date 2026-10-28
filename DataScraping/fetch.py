@@ -61,6 +61,10 @@ def fetch():
 			"xAG": float(p["expected_assists"]),
 			"Team": teams[p["team"]]["name"],
 			"TeamCode": teams[p["team"]]["code"],
+			"Price": p["now_cost"] / 10,
+			"Points": p["total_points"],
+			"Status": p["status"],
+			"News": p["news"],
 			"Season": season,
 		})
 	return season, pd.DataFrame(rows)
