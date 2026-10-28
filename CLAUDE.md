@@ -23,7 +23,9 @@ Config comes from env vars, nothing is committed: `DB_URL` (JDBC URL), `DB_USERN
 
 ## Data pipeline
 
-From `DataScraping/` (`pip install -r requirements.txt`): `python fetch.py`, then `python load.py data/stats-2026-27.csv`. `fetch.py` calls the public FPL API (no browser, no key), covers the current season only and players with minutes > 0; MP is counted from each player's match history. `load.py` reads `DATABASE_URL` (postgresql:// form, see `.env.example`) and upserts, so re-running during the season is safe and refreshes the numbers.
+From `DataScraping/` (`pip install -r requirements.txt`): `python fetch.py`, then `python load.py data/stats-2026-27.csv`. `fetch.py` calls the public FPL API (no browser, no key), covers the current season only and players with minutes > 0; MP is counted from each player's match history. `load.py` reads `DATABASE_URL` (postgresql:// form, see `.env.example`) and upserts, so re-running during the season is safe and refreshes the numbers; after a transfer it also removes the player's row for the old club in the same season.
+
+`.github/workflows/update-data.yml` runs both scripts every 3 hours Friday to Monday (UTC) plus on demand, using the `DATABASE_URL` repository secret. GitHub only runs scheduled workflows from the default branch (`master`), and the runners are IPv4-only, so the secret must be the Session pooler string.
 
 The FPL API has no penalties scored (stored as `pens_missed`) and gives nationality as a region id, resolved through `/api/regions/`. Players are keyed on the FPL `code`, which is stable across seasons; team names are FPL's short names (`Man City`, `Spurs`) and `team.code` builds the badge URL.
 

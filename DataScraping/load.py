@@ -48,6 +48,13 @@ def main(path):
 				 py(r["PensMissed"]), py(r["CrdY"]), py(r["CrdR"]), py(r["xG"]), py(r["xAG"]),
 				 py(r["Code"]), py(r["TeamCode"])),
 			)
+			# After a transfer FPL reports only the new club, so drop the old club's row for this season
+			cur.execute(
+				"""delete from player_season ps using player p, team t
+				   where p.code = %s and t.code = %s and ps.player_id = p.id
+				     and ps.season = %s and ps.team_id <> t.id""",
+				(py(r["Code"]), py(r["TeamCode"]), r["Season"]),
+			)
 	print(f"Loaded {len(df)} player-season rows from {path}")
 
 

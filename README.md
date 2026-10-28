@@ -69,6 +69,10 @@ npm run dev
 
 The dev server runs on port 3000 and forwards `/api` requests to the backend on port 8080. If your backend is on another port, put `VITE_PROXY_TARGET=http://localhost:8081` in `frontend/.env.local`. For a production build, set `VITE_API_URL` to the deployed backend URL and run `npm run build`.
 
+### Automatic updates
+
+`.github/workflows/update-data.yml` re-runs the fetch and load every 3 hours from Friday to Monday (UTC), when the games are played. To enable it, add a repository secret named `DATABASE_URL` (GitHub > Settings > Secrets and variables > Actions) with the same Session pooler connection string as in `.env`. You can also run it by hand from the Actions tab with "Run workflow", for example after a midweek round.
+
 ## API
 
 All endpoints are `GET` and return JSON.
