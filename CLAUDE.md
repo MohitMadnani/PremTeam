@@ -46,10 +46,12 @@ Frontend (from `frontend/`): `npm run dev` (port 3000), `npm run build` (to `bui
 - Routes (`src/App.jsx`): `/`, `/search`, `/teams`, `/nations`, `/positions`, and `/data` / `/teamdata`, both rendering `TeamData` (styled card grid with sort), which picks the request from the query string (`team`, `nation`, `position`, `name`).
 - The team list comes from the API; the nations list comes from the API too, and `src/jsondata/countries.json` (generated from the FPL `/api/regions/`) maps each 3-letter code to a name and flag code. Position labels live in `position.json`. Team badges load from `resources.premierleague.com/premierleague/badges/70/t<code>.png`.
 
+CI: `.github/workflows/ci.yml` runs on pull requests and pushes to `master` with no secrets: `./mvnw -B test` (the wrapper needs `chmod +x` on Linux), `npm ci && npm run build`, and a `py_compile` check of `fetch.py` and `load.py`.
+
 ## Rules
 
-- Never commit credentials. A Supabase password was committed in earlier history and must be treated as leaked; rotate it.
-- Work on a branch, not `master`.
+- Never commit credentials: no database passwords or connection strings in tracked files. Local secrets go in the gitignored `.env`, `frontend/.env.local` and `command.md`; the data workflow reads `DATABASE_URL` from a GitHub repository secret. The repo is public.
+- Work on a branch, not `master`. Changes land through a pull request, and CI (`.github/workflows/ci.yml`: backend tests, frontend build, data script check) should be green before merging.
 
 ## MCP permission requests
 
